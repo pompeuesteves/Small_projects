@@ -1,0 +1,44 @@
+-- Queries executed in big query environment:
+
+--1º Total equipment failures that happened?
+--13
+--
+SELECT count(distinct b.equipment_id)
+FROM shape_2xs.equipment_failure_sensors a
+left join shape_2xs.equipment_sensors b
+on a.sensor_id = b.sensor_id
+left join shape_2xs.equipment c
+on b.equipment_id = c.equipment_id;
+
+
+--2ª Which equipment code had most failures?
+--E1AD07D4
+--
+select equipment_code, count(1)
+from (
+    SELECT time, vibration, a.sensor_id, temperature, b.equipment_id, c.code as equipment_code, c.group_name as equipment_group
+    FROM shape_2xs.equipment_failure_sensors a
+    left join shape_2xs.equipment_sensors b
+    on a.sensor_id = b.sensor_id
+    left join shape_2xs.equipment c
+    on b.equipment_id = c.equipment_id
+)
+group by equipment_code
+order by 2 desc;
+
+
+--3º Average amount of failures across equipment group, ordering by the amount of failures in ascending order?
+--
+select equipment_group, avg(qty_error) as avg_failures_by_equip_group, sum(qty_error) as qty_error_by_equip_group
+from (
+select distinct equipment_group, equipment_id, count(1) over(partition by equipment_id) as qty_error
+from (
+    SELECT time, vibration, a.sensor_id, temperature, b.equipment_id, c.code as equipment_code, c.group_name as equipment_group
+    FROM shape_2xs.equipment_failure_sensors a
+    left join shape_2xs.equipment_sensors b
+    on a.sensor_id = b.sensor_id
+    left join shape_2xs.equipment c
+    on b.equipment_id = c.equipment_id
+)
+) group by equipment_group
+order by 3;
