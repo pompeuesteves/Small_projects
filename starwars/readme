@@ -1,0 +1,7 @@
+Esse projeto starwars coleta informações da api StarWars:
+- https://swapi.dev/api/
+
+StarWars_01.py coleta as informações (formato json) e salva em um bucket no google cloud storage
+
+StarWars_01_BQ.py coleta as informações do bucket e salva no Big Query
+
