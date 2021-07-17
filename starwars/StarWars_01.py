@@ -23,8 +23,8 @@ def get_starwarspeople(numpeople):
 
 
 def catchall():
-    arraycast = []
-    for i in range(numcasts):
+    arraycast=[]
+    for i in range(1,numcasts):
         print(str(i)+")")
         print(get_starwarspeople(str(i)))
         arraycast.append(get_starwarspeople(str(i)))
@@ -43,7 +43,11 @@ def save_applications_bucket(app_json):
     else:
         client = storage.Client.from_service_account_json("../storage2bq.json")
 
-    bucket = client.create_bucket("bucket_starwars")
+    try:
+        bucket = client.create_bucket("bucket_starwars")
+    except:
+        print("bucket já existe")
+
     bucket = client.get_bucket("bucket_starwars")
     file_name = 'people'
     blob = bucket.blob(file_name)
@@ -53,8 +57,6 @@ def save_applications_bucket(app_json):
 # Google function main method
 def get_starwars():
     getthem = catchall()
-    #getthem = catchone("1")
-    #print(getthem)
     save_applications_bucket(getthem)
     return "Job done!"
 
