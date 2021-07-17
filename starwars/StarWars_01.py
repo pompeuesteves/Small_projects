@@ -4,12 +4,6 @@ import logging as log
 from google.cloud import storage
 import os
 
-# Get all people from StarWars
-url = "https://swapi.dev/api/people/"
-numcasts = 10
-
-
-# 83
 
 def get_starwarspeople(numpeople):
     global response
@@ -31,6 +25,8 @@ def get_starwarspeople(numpeople):
 def catchall():
     arraycast = []
     for i in range(numcasts):
+        print(str(i)+")")
+        print(get_starwarspeople(str(i)))
         arraycast.append(get_starwarspeople(str(i)))
     return arraycast
 
@@ -56,13 +52,17 @@ def save_applications_bucket(app_json):
 
 # Google function main method
 def get_starwars():
-    #getthem = catchall()
-    getthem = catchone("1")
-    print(getthem)
+    getthem = catchall()
+    #getthem = catchone("1")
+    #print(getthem)
     save_applications_bucket(getthem)
     return "Job done!"
 
 
 # for local test
 if __name__ == "__main__":
+    # Get all people from StarWars
+    # people--83, planets--60, starships--17
+    url = "https://swapi.dev/api/people/"
+    numcasts = 10
     get_starwars()
