@@ -1,46 +1,50 @@
 -- Queries executed in big query environment:
 
---1º Total equipment failures that happened?
+--1º Total equipment failures that happened?--in 2020-01
 --13
 --
-SELECT count(distinct b.equipment_id)
-FROM shape_2xs.equipment_failure_sensors a
-left join shape_2xs.equipment_sensors b
-on a.sensor_id = b.sensor_id
-left join shape_2xs.equipment c
-on b.equipment_id = c.equipment_id;
+with base as (
+    SELECT EXTRACT(month FROM time AT TIME ZONE "UTC") as month, EXTRACT(year FROM time AT TIME ZONE "UTC") as year, vibration, a.sensor_id, temperature, b.equipment_id, c.code as equipment_code, c.group_name as equipment_group, 1 as error,
+    count(distinct b.equipment_id) over(partition by group_name) as total_equip_id
+    FROM shape_2xs.equipment_failure_sensors a
+    left join shape_2xs.equipment_sensors b
+    on a.sensor_id = b.sensor_id
+    left join shape_2xs.equipment c
+    on b.equipment_id = c.equipment_id
+)
+SELECT count(distinct equipment_id) from base where month=1 and year=2020;
 
 
---2ª Which equipment code had most failures?
+
+--2ª Which equipment code had most failures?--in 2020-01
 --E1AD07D4
 --
-select equipment_code, count(1) as qty_failure
-from (
-    SELECT time, vibration, a.sensor_id, temperature, b.equipment_id, c.code as equipment_code, c.group_name as equipment_group
+with base as (
+    SELECT EXTRACT(month FROM time AT TIME ZONE "UTC") as month, EXTRACT(year FROM time AT TIME ZONE "UTC") as year, vibration, a.sensor_id, temperature, b.equipment_id, c.code as equipment_code, c.group_name as equipment_group, 1 as error,
+    count(distinct b.equipment_id) over(partition by group_name) as total_equip_id
     FROM shape_2xs.equipment_failure_sensors a
     left join shape_2xs.equipment_sensors b
     on a.sensor_id = b.sensor_id
     left join shape_2xs.equipment c
     on b.equipment_id = c.equipment_id
 )
-group by equipment_code
-order by 2 desc;
+SELECT equipment_code, count(1) as qty_failure from base where month=1 and year=2020 group by equipment_code order by 2 desc;
 
 
---3º Average amount of failures across equipment group, ordering by the amount of failures in ascending order?
+
+--3º Average amount of failures across equipment group, ordering by the amount of failures in ascending order?--in 2020-01
 --
-select equipment_group, avg(qty_error) as avg_failures_by_equip_group, sum(qty_error) as qty_error_by_equip_group
-from (
-select distinct equipment_group, equipment_id, count(1) over(partition by equipment_id) as qty_error
-from (
-    SELECT time, vibration, a.sensor_id, temperature, b.equipment_id, c.code as equipment_code, c.group_name as equipment_group
+with base as (
+    SELECT EXTRACT(month FROM time AT TIME ZONE "UTC") as month, EXTRACT(year FROM time AT TIME ZONE "UTC") as year, vibration, a.sensor_id, temperature, b.equipment_id, c.code as equipment_code, c.group_name as equipment_group, 1 as error,
+    count(distinct b.equipment_id) over(partition by group_name) as total_equip_id
     FROM shape_2xs.equipment_failure_sensors a
     left join shape_2xs.equipment_sensors b
     on a.sensor_id = b.sensor_id
     left join shape_2xs.equipment c
     on b.equipment_id = c.equipment_id
 )
-) group by equipment_group
+select
+    equipment_group, avg(qty_error) as avg_failures_by_equip_group, sum(qty_error) as qty_error_by_equip_group
+from ( select distinct equipment_group, equipment_id, count(1) over(partition by equipment_id) as qty_error from base where month=1 and year=2020 )
+group by equipment_group
 order by 3;
-
-
