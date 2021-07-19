@@ -14,7 +14,7 @@ on b.equipment_id = c.equipment_id;
 --2ª Which equipment code had most failures?
 --E1AD07D4
 --
-select equipment_code, count(1)
+select equipment_code, count(1) as qty_failure
 from (
     SELECT time, vibration, a.sensor_id, temperature, b.equipment_id, c.code as equipment_code, c.group_name as equipment_group
     FROM shape_2xs.equipment_failure_sensors a
@@ -42,3 +42,5 @@ from (
 )
 ) group by equipment_group
 order by 3;
+
+
