@@ -1,6 +1,5 @@
-*.csv
 .project
-*.csv
+
 .ipynb_checkpoints
 data
 .idea/
