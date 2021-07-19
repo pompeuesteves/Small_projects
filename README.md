@@ -1,2 +1,2 @@
-# Teste
-Este Repositório é apenas um teste
+# Small_projects
+This Repository is where small projects are gathered
